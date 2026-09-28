@@ -1,0 +1,599 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NLP Text Analyzer</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f5f8;
+            color: #202124;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1100px;
+            margin: 35px auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin-bottom: 8px;
+            font-size: 36px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.07);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 160px;
+            padding: 15px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 13px 28px;
+            border: none;
+            border-radius: 8px;
+            background: #202124;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .result-text {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+
+        .token-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .token {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 7px 10px;
+            border-radius: 6px;
+        }
+
+        .entity {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            background: white;
+            padding: 12px;
+            border-radius: 7px;
+            margin-bottom: 8px;
+        }
+
+        .entity-name {
+            font-weight: bold;
+        }
+
+        .entity-label {
+            color: #555;
+            font-size: 14px;
+        }
+
+        .positive {
+            color: green;
+            font-weight: bold;
+            font-size: 22px;
+        }
+
+        .negative {
+            color: red;
+            font-weight: bold;
+            font-size: 22px;
+        }
+
+        .neutral {
+            color: #777;
+            font-weight: bold;
+            font-size: 22px;
+        }
+
+        .score {
+            margin: 8px 0;
+        }
+
+        .pipeline {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .step {
+            background: #f1f3f4;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .arrow {
+            font-size: 20px;
+            color: #777;
+        }
+
+        @media (max-width: 750px) {
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: auto;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <h1>NLP Text Analyzer</h1>
+
+        <p>
+            Text Processing • Tokenization • Lemmatization • Entity Extraction • Sentiment Analysis
+        </p>
+
+    </div>
+
+
+    <!-- PIPELINE -->
+
+    <div class="card">
+
+        <h2>NLP Pipeline</h2>
+
+        <div class="pipeline">
+
+            <div class="step">
+                Input
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="step">
+                Preprocessing
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="step">
+                Tokenization
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="step">
+                Stop-word Removal
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="step">
+                Lemmatization
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="step">
+                NER
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="step">
+                Sentiment
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- INPUT -->
+
+    <div class="card">
+
+        <h2>Enter Text</h2>
+
+        <form method="POST">
+
+            <textarea
+                name="text"
+                placeholder="Example: I love Apple products. The new iPhone is amazing and I bought it in Mumbai."
+                required
+            >{{ text }}</textarea>
+
+            <br>
+
+            <button type="submit">
+                Analyze Text
+            </button>
+
+        </form>
+
+    </div>
+
+
+    {% if result %}
+
+
+    <!-- ORIGINAL + CLEANED -->
+
+    <div class="card">
+
+        <h2>Text Preprocessing</h2>
+
+        <div class="grid">
+
+
+            <div class="box">
+
+                <h3>Original Text</h3>
+
+                <div class="result-text">
+
+                    {{ result.original_text }}
+
+                </div>
+
+            </div>
+
+
+            <div class="box">
+
+                <h3>Cleaned Text</h3>
+
+                <div class="result-text">
+
+                    {{ result.cleaned_text }}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- TOKENIZATION -->
+
+    <div class="card">
+
+        <h2>Tokenization</h2>
+
+        <p>
+            The text is divided into individual tokens/words.
+        </p>
+
+        <div class="token-container">
+
+            {% for token in result.tokens %}
+
+                <span class="token">
+                    {{ token }}
+                </span>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- STOP WORD REMOVAL -->
+
+    <div class="card">
+
+        <h2>After Stop-word Removal</h2>
+
+        <p>
+            Common words such as "the", "is", "a", etc. are removed.
+        </p>
+
+        <div class="token-container">
+
+            {% for word in result.without_stopwords %}
+
+                <span class="token">
+                    {{ word }}
+                </span>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- LEMMATIZATION -->
+
+    <div class="card">
+
+        <h2>Lemmatization</h2>
+
+        <p>
+            Words are converted to their base/dictionary form.
+        </p>
+
+        <div class="token-container">
+
+            {% for lemma in result.lemmas %}
+
+                <span class="token">
+                    {{ lemma }}
+                </span>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ENTITIES -->
+
+    <div class="card">
+
+        <h2>Entity Extraction (NER)</h2>
+
+        {% if result.entities %}
+
+            {% for entity in result.entities %}
+
+                <div class="entity">
+
+                    <span class="entity-name">
+
+                        {{ entity.text }}
+
+                    </span>
+
+                    <span class="entity-label">
+
+                        {{ entity.label }}
+
+                        -
+
+                        {{ entity.description }}
+
+                    </span>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>
+                No named entities detected.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- SENTIMENT -->
+
+    <div class="card">
+
+        <h2>Sentiment Analysis</h2>
+
+        <div class="grid">
+
+
+            <div class="box">
+
+                {% if result.sentiment.label == "POSITIVE" %}
+
+                    <div class="positive">
+                        😊 POSITIVE
+                    </div>
+
+                {% elif result.sentiment.label == "NEGATIVE" %}
+
+                    <div class="negative">
+                        😞 NEGATIVE
+                    </div>
+
+                {% else %}
+
+                    <div class="neutral">
+                        😐 NEUTRAL
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="box">
+
+                <div class="score">
+
+                    <strong>
+                        Compound:
+                    </strong>
+
+                    {{ result.sentiment.compound }}
+
+                </div>
+
+
+                <div class="score">
+
+                    <strong>
+                        Positive:
+                    </strong>
+
+                    {{ result.sentiment.positive }}
+
+                </div>
+
+
+                <div class="score">
+
+                    <strong>
+                        Negative:
+                    </strong>
+
+                    {{ result.sentiment.negative }}
+
+                </div>
+
+
+                <div class="score">
+
+                    <strong>
+                        Neutral:
+                    </strong>
+
+                    {{ result.sentiment.neutral }}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    {% endif %}
+
+
+    <!-- API INFO -->
+
+    <div class="card">
+
+        <h2>REST API</h2>
+
+        <p>
+            This NLP pipeline can also be accessed programmatically
+            using the REST API.
+        </p>
+
+        <p>
+            <strong>POST</strong>
+            <code>/api/analyze</code>
+        </p>
+
+        <p>
+            <strong>GET</strong>
+            <code>/api/health</code>
+        </p>
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>
